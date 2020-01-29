@@ -26,6 +26,33 @@ class ExtendedUserCreationForm(UserCreationForm):
 
 
 class UserProfileForm(forms.ModelForm):
+    school = forms.CharField(max_length=100, required=False)
+    study_year = forms.IntegerField(required=False)
+
     class Meta:
         model = Profile
-        fields = ('school', 'user_type', 'study_year')
+        fields = ('user_type', 'school', 'study_year')
+
+    def clean_school(self):
+        user_type = self.cleaned_data.get('user_type')
+        school = self.cleaned_data.get('school')
+        if user_type == 'student' and (school is None or school == ""):
+            raise forms.ValidationError('This field is required!')
+        return school
+
+    def clean_study_year(self):
+        user_type = self.cleaned_data.get('user_type')
+        study_year = self.cleaned_data.get('study_year')
+        if user_type == 'student' and (study_year is None or study_year < 1 or study_year > 4):
+            raise forms.ValidationError('Please enter a valid number!')
+        return study_year
+
+    def save(self, commit=True):
+        profile = super().save(commit=False)
+
+        profile.school = self.cleaned_data['school']
+        profile.study_year = self.cleaned_data['study_year']
+
+        if commit:
+            profile.save()
+        return profile
