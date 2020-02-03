@@ -30,6 +30,27 @@
                             {{ profile_form.study_year|as_crispy_field }}
                         </div>
                     </div>
+                    <div id="div_id_booking_slots" class="form-group">
+                        <label for="id_booking_slots">{{ profile_form.booking_slots.label }}*</label>
+                        <div>
+                            <select name="{{ profile_form.booking_slots.name }}"
+                                    id="id_booking_slots"
+                                    class="selectpicker form-control"
+                                    data-width="100%" multiple data-actions-box="true">
+                                {% for value, text in profile_form.booking_slots.field.choices %}
+                                    <option id="id_booking_slots_{{ forloop.counter0 }}"
+                                            value="{{ value }}">{{ text }}</option>
+                                {% endfor %}
+                            </select>
+                            {% if profile_form.booking_slots.errors %}
+                                <div class="non-field-errors">
+                                    {% for err in profile_form.booking_slots.errors %}
+                                        <p class="booking_slot_error"><strong>{{ err }}</strong></p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
                     <button type="submit" class="btn btn-primary btn-block btn-lg mt-2">Sign up</button>
                 </form>
             </div>

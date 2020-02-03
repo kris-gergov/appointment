@@ -31,21 +31,28 @@ class UserProfileForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = ('user_type', 'school', 'study_year')
+        fields = ('user_type', 'school', 'study_year', 'booking_slots')
 
     def clean_school(self):
         user_type = self.cleaned_data.get('user_type')
         school = self.cleaned_data.get('school')
         if user_type == 'student' and (school is None or school == ""):
-            raise forms.ValidationError('This field is required!')
+            raise forms.ValidationError('This field is required.')
         return school
 
     def clean_study_year(self):
         user_type = self.cleaned_data.get('user_type')
         study_year = self.cleaned_data.get('study_year')
         if user_type == 'student' and (study_year is None or study_year < 1 or study_year > 4):
-            raise forms.ValidationError('Please enter a valid number!')
+            raise forms.ValidationError('Please enter a valid number.')
         return study_year
+
+    def clean_booking_slots(self):
+        user_type = self.cleaned_data.get('user_type')
+        booking_slots = self.cleaned_data.get('booking_slots')
+        if not booking_slots and user_type == 'adviser':
+            raise forms.ValidationError('This field is required.')
+        return booking_slots
 
     def save(self, commit=True):
         profile = super().save(commit=False)
