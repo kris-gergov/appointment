@@ -28,10 +28,12 @@ class ExtendedUserCreationForm(UserCreationForm):
 class UserProfileForm(forms.ModelForm):
     school = forms.CharField(max_length=100, required=False)
     study_year = forms.IntegerField(required=False)
+    adviser = forms.ModelChoiceField(
+        queryset=User.objects.filter(profile__user_type='adviser'), empty_label=None, required=False)
 
     class Meta:
         model = Profile
-        fields = ('user_type', 'school', 'study_year', 'booking_slots')
+        fields = ('user_type', 'school', 'study_year', 'booking_slots', 'adviser')
 
     def clean_school(self):
         user_type = self.cleaned_data.get('user_type')
@@ -53,6 +55,13 @@ class UserProfileForm(forms.ModelForm):
         if not booking_slots and user_type == 'adviser':
             raise forms.ValidationError('This field is required.')
         return booking_slots
+
+    def clean_adviser(self):
+        user_type = self.cleaned_data.get('user_type')
+        adviser = self.cleaned_data.get('adviser')
+        if user_type == 'adviser':
+            return None
+        return adviser
 
     def save(self, commit=True):
         profile = super().save(commit=False)

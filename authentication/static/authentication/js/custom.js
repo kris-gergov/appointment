@@ -5,6 +5,8 @@ jQuery(document).ready(function ($) {
         $('#div_id_school').hide();
         $('#id_study_year').hide();
         $('#div_id_study_year').hide();
+        $('#id_adviser').hide();
+        $('#div_id_adviser').hide();
         $('#id_booking_slots').show();
         $('#div_id_booking_slots').show();
     } else if (val === "student") {
@@ -12,6 +14,8 @@ jQuery(document).ready(function ($) {
         $('#div_id_school').show();
         $('#id_study_year').show();
         $('#div_id_study_year').show();
+        $('#id_adviser').show();
+        $('#div_id_adviser').show();
         $('#id_booking_slots').hide();
         $('#div_id_booking_slots').hide();
     }
@@ -24,6 +28,8 @@ jQuery(document).ready(function ($) {
                 $('#div_id_school').hide();
                 $('#id_study_year').hide();
                 $('#div_id_study_year').hide();
+                $('#id_adviser').hide();
+                $('#div_id_adviser').hide();
                 $('#id_booking_slots').show();
                 $('#div_id_booking_slots').show();
             } else if (value === "student") {
@@ -31,6 +37,8 @@ jQuery(document).ready(function ($) {
                 $('#div_id_school').show();
                 $('#id_study_year').show();
                 $('#div_id_study_year').show();
+                $('#id_adviser').show();
+                $('#div_id_adviser').show();
                 $('#id_booking_slots').hide();
                 $('#div_id_booking_slots').hide();
             }

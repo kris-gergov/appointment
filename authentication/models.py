@@ -41,6 +41,14 @@ class Profile(models.Model):
         ('16:30', "16:30"),
     )
     booking_slots = MultiSelectField(choices=SLOT_CHOICES, default='09:00', blank=True, null=True)
+    adviser = models.ForeignKey(User, related_name='+', null=True, blank=True, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.user.username
+        return self.user.first_name + " " + self.user.last_name
+
+
+def get_full_name(self):
+    return self.first_name + " " + self.last_name
+
+
+User.add_to_class("__str__", get_full_name)
