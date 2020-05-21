@@ -1,7 +1,8 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Profile
+from .models import Profile, Meeting
+import datetime
 
 
 class ExtendedUserCreationForm(UserCreationForm):
@@ -63,12 +64,49 @@ class UserProfileForm(forms.ModelForm):
             return None
         return adviser
 
-    def save(self, commit=True):
-        profile = super().save(commit=False)
 
-        profile.school = self.cleaned_data['school']
-        profile.study_year = self.cleaned_data['study_year']
+class EditBookingSlotsForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = {'booking_slots'}
+
+    def clean_booking_slots(self):
+        booking_slots = self.cleaned_data.get('booking_slots')
+        if not booking_slots:
+            raise forms.ValidationError('This field is required.')
+        return booking_slots
+
+
+class MeetingForm(forms.ModelForm):
+    meeting_title = forms.CharField(max_length=100)
+    meeting_description = forms.Textarea
+    meeting_date = forms.DateField(widget=forms.TextInput(attrs={'type': 'date'}))
+    meeting_slot = forms.ChoiceField(widget=forms.Select, required=True)
+
+    class Meta:
+        model = Meeting
+        fields = ('meeting_title', 'meeting_description', 'meeting_date', 'meeting_slot')
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user')
+        super(MeetingForm, self).__init__(*args, **kwargs)
+        adviser_slots = user.profile.adviser.profile.booking_slots
+        self.fields['meeting_slot'].choices = [(val, val) for val in adviser_slots]
+
+    def clean_meeting_date(self):
+        meeting_date = self.cleaned_data.get('meeting_date')
+        if meeting_date < datetime.date.today():
+            raise forms.ValidationError("The date cannot be in the past!")
+        return meeting_date
+
+    def save(self, commit=True):
+        meeting = super().save(commit=False)
+
+        meeting.meeting_title = self.cleaned_data['meeting_title']
+        meeting.meeting_description = self.cleaned_data['meeting_description']
+        meeting.meeting_date = self.cleaned_data['meeting_date']
+        meeting.meeting_slot = self.cleaned_data['meeting_slot']
 
         if commit:
-            profile.save()
-        return profile
+            meeting.save()
+        return meeting

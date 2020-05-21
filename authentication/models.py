@@ -3,6 +3,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import IntegerField, Model
 from multiselectfield import MultiSelectField
+from django.core.exceptions import ValidationError
+from django.urls import reverse
 
 
 class Profile(models.Model):
@@ -45,6 +47,34 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.user.first_name + " " + self.user.last_name
+
+
+class Meeting(models.Model):
+    meeting_title = models.CharField(max_length=110, blank=True, null=True)
+    meeting_description = models.TextField(blank=False)
+    meeting_adviser = models.ForeignKey(User, on_delete=models.CASCADE)
+    meeting_student = models.ForeignKey(User, related_name='+', on_delete=models.CASCADE)
+    meeting_date = models.DateField()
+    meeting_slot = models.CharField(max_length=10)
+    confirmed = models.BooleanField(default=False)
+
+    def check_overlap(self, taken_slot, new_slot):
+        overlap = False
+        if taken_slot == new_slot:  # edge case
+            overlap = True
+
+        return overlap
+
+    def get_absolute_url(self):
+        url = reverse('meeting_detail', kwargs={'pk': self.id})
+        return u'<a href="%s">%s</a>' % (url, str(self.meeting_slot))
+
+    def clean(self):
+        meetings = Meeting.objects.filter(meeting_date=self.meeting_date)
+        if meetings.exists():
+            for meeting in meetings:
+                if self.check_overlap(meeting.meeting_slot, self.meeting_slot):
+                    raise ValidationError('This booking slot is currently taken,')
 
 
 def get_full_name(self):

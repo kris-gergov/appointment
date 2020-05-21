@@ -1,9 +1,26 @@
 {% extends "authentication/header.html" %}
 
 {% block content %}
-<div class="row">
-<h1>Testing</h1>
-</div>
+    <div id="content-main">
+        <div class="row">
+            <h1>Calendar</h1>
+        </div>
+        <div class="container p-3">
+            <ul class="object-tools">
+                <li>
+                    <a href={{ previous_month }}>
+                        Previous Month
+                    </a>
+                </li>
+                <li>
+                    <a href={{ next_month }}>
+                        Next Month
+                    </a>
+                </li>
+            </ul>
+            {{ calendar }}
+        </div>
+    </div>
 {% endblock %}
 
 

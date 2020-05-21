@@ -1,0 +1,36 @@
+{% extends "authentication/header.html" %}
+
+{% block content %}
+    <div class="col-md-8 offset-md-2">
+        <h1>Unconfirmed meetings</h1>
+        <table class="table table-hover">
+            <thead class="thead-dark">
+            <tr>
+                <th scope="col">Title</th>
+                <th scope="col">Description</th>
+                <th scope="col">Date</th>
+                <th scope="col">Slot</th>
+                {% if user.profile.user_type == 'adviser' %}
+                    <th>Student</th>
+                    <th></th>
+                {% endif %}
+            </tr>
+            </thead>
+            <tbody>
+            {% for r in meeting_list %}
+                <tr>
+                    <td>{{ r.meeting_title }}</td>
+                    <td>{{ r.meeting_description|truncatechars:400 }}</td>
+                    <td>{{ r.meeting_date }}</td>
+                    <td>{{ r.meeting_slot }}</td>
+                    {% if user.profile.user_type == 'adviser' %}
+                        <td>{{ r.meeting_student }}</td>
+                        <td><a href="{% url 'confirm_specific_meeting' pk=r.id %}">Confirm</a>
+                        </td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

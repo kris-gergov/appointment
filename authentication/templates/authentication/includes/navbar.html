@@ -7,7 +7,28 @@
         <div class="navbar-collapse collapse" id="navbar9">
             <ul class="navbar-nav ml-auto">
                 {% if user.is_authenticated %}
-                    <li class="nav-item"><a class="nav-link" href="/account">Account</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/">Calendar</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Meetings
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="/unconfirmed_meetings">Unconfirmed meetings</a>
+                            <a class="dropdown-item" href="/confirmed_meetings">Confirmed meetings</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="/past_meetings">Past meetings</a>
+                            {% if user.profile.user_type == 'adviser' %}
+                                <a class="dropdown-item" href="/change_slots">Change booking slots</a>
+                            {% endif %}
+                        </div>
+                    </li>
+                    {% if user.profile.user_type == 'student' %}
+                        <li class="nav-item"><a class="nav-link" href="/meeting">Create a meeting</a></li>
+                    {% endif %}
+                    {% if user.profile.user_type == 'adviser' %}
+                        <li class="nav-item"><a class="nav-link" href="/user_profile">Profile</a></li>
+                    {% endif %}
                     <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
                 {% else %}
                     <li class="nav-item"><a class="nav-link" href="/register">Register</a></li>
