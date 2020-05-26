@@ -18,7 +18,7 @@
             <tbody>
             {% for r in meeting_list %}
                 <tr>
-                    <td>{{ r.meeting_title }}</td>
+                    <td><a href="{{ r.get_absolute_url_title }}">{{ r.meeting_title }}</a></td>
                     <td>{{ r.meeting_description|truncatechars:400 }}</td>
                     <td>{{ r.meeting_date }}</td>
                     <td>{{ r.meeting_slot }}</td>

@@ -21,38 +21,42 @@ from django.http import Http404
 
 @login_required()
 def home(request):
-    after_day = request.GET.get('meeting_date__gte', None)
-    extra_context = {}
+    if not request.user.is_superuser:
+        after_day = request.GET.get('meeting_date__gte', None)
+        extra_context = {}
 
-    if not after_day:
-        d = dt.date.today()
-    else:
-        try:
-            split_after_day = after_day.split('-')
-            d = dt.date(year=int(split_after_day[0]), month=int(split_after_day[1]), day=1)
-        except:
+        if not after_day:
             d = dt.date.today()
+        else:
+            try:
+                split_after_day = after_day.split('-')
+                d = dt.date(year=int(split_after_day[0]), month=int(split_after_day[1]), day=1)
+            except:
+                d = dt.date.today()
 
-    previous_month = dt.date(year=d.year, month=d.month, day=1)  # find first day of current month
-    previous_month = previous_month - dt.timedelta(days=1)  # backs up a single day
-    previous_month = dt.date(year=previous_month.year, month=previous_month.month,
-                                   day=1)  # find first day of previous month
+        previous_month = dt.date(year=d.year, month=d.month, day=1)  # find first day of current month
+        previous_month = previous_month - dt.timedelta(days=1)  # backs up a single day
+        previous_month = dt.date(year=previous_month.year, month=previous_month.month,
+                                 day=1)  # find first day of previous month
 
-    last_day = calendar.monthrange(d.year, d.month)
-    next_month = dt.date(year=d.year, month=d.month, day=last_day[1])  # find last day of current month
-    next_month = next_month + dt.timedelta(days=1)  # forward a single day
-    next_month = dt.date(year=next_month.year, month=next_month.month,
-                               day=1)  # find first day of next month
+        last_day = calendar.monthrange(d.year, d.month)
+        next_month = dt.date(year=d.year, month=d.month, day=last_day[1])  # find last day of current month
+        next_month = next_month + dt.timedelta(days=1)  # forward a single day
+        next_month = dt.date(year=next_month.year, month=next_month.month,
+                             day=1)  # find first day of next month
 
-    extra_context['previous_month'] = reverse('home') + '?meeting_date__gte=' + str(
-        previous_month)
-    extra_context['next_month'] = reverse('home') + '?meeting_date__gte=' + str(next_month)
+        extra_context['previous_month'] = reverse('home') + '?meeting_date__gte=' + str(
+            previous_month)
+        extra_context['next_month'] = reverse('home') + '?meeting_date__gte=' + str(next_month)
 
-    cal = EventCalendar()
-    html_calendar = cal.formatmonth(d.year, d.month, request.user, withyear=True)
-    html_calendar = html_calendar.replace('<td ', '<td  width="150" height="150"')
-    extra_context['calendar'] = mark_safe(html_calendar)
-    return render(request, 'authentication/home.html', extra_context)
+        cal = EventCalendar()
+        html_calendar = cal.formatmonth(d.year, d.month, request.user, withyear=True)
+        html_calendar = html_calendar.replace('<td ', '<td  width="150" height="150"')
+        extra_context['calendar'] = mark_safe(html_calendar)
+        return render(request, 'authentication/home.html', extra_context)
+    else:
+        logout(request)
+        return redirect('home')
 
 
 def login_user(request):
@@ -60,7 +64,7 @@ def login_user(request):
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(request, username=username, password=password)
-        if user is not None:
+        if user is not None:  # if user exists
             login(request, user)
             messages.success(request, 'Successful login!')
             return redirect('home')
@@ -83,7 +87,7 @@ def register_user(request):
         form = ExtendedUserCreationForm(request.POST)
         profile_form = UserProfileForm(request.POST)
 
-        if form.is_valid() and profile_form.is_valid():
+        if form.is_valid() and profile_form.is_valid():  # Validate both forms
             user = form.save()
 
             profile = profile_form.save(commit=False)
@@ -92,7 +96,7 @@ def register_user(request):
 
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password1')
-            user = authenticate(username=username, password=password)
+            user = authenticate(username=username, password=password)  # log user in
             login(request, user)
 
             messages.success(request, 'Successful registration!')
@@ -107,21 +111,27 @@ def register_user(request):
 
 @login_required()
 def user_profile(request):
-    user = request.user
-    context = {'user': user}
-    return render(request, 'authentication/user_profile.html', context)
+    if request.user.profile.user_type == "adviser":
+        user = request.user
+        context = {'user': user}
+        return render(request, 'authentication/user_profile.html', context)
+    else:
+        return redirect('home')
 
 
 @login_required()
 def change_slots(request):
-    if request.method == 'POST':
-        profile_form = EditBookingSlotsForm(request.POST, instance=request.user.profile)
-        if profile_form.is_valid():
-            profile_form.save()
-            messages.success(request, 'Profile has been changed!')
-            return redirect('home')
+    if request.user.profile.user_type == "adviser":  # only advisers can edits their slots
+        if request.method == 'POST':
+            profile_form = EditBookingSlotsForm(request.POST, instance=request.user.profile)
+            if profile_form.is_valid():
+                profile_form.save()
+                messages.success(request, 'Profile has been changed!')
+                return redirect('home')
+        else:
+            profile_form = EditBookingSlotsForm(instance=request.user.profile)
     else:
-        profile_form = EditBookingSlotsForm(instance=request.user.profile)
+        return redirect('home')
 
     context = {'profile_form': profile_form}
     return render(request, 'authentication/change_slots.html', context)
@@ -129,35 +139,38 @@ def change_slots(request):
 
 @login_required()
 def meeting(request):
-    if request.method == 'POST':
-        meeting_form = MeetingForm(request.POST, user=request.user)
+    if request.user.profile.user_type == "student":  # only students can create meetings
+        if request.method == 'POST':
+            meeting_form = MeetingForm(request.POST, user=request.user)
 
-        if meeting_form.is_valid():
-            meeting_instance = meeting_form.save(commit=False)
-            meeting_instance.meeting_student = request.user
-            meeting_instance.meeting_adviser = request.user.profile.adviser
-            meeting_instance.save()
+            if meeting_form.is_valid():
+                meeting_instance = meeting_form.save(commit=False)
+                meeting_instance.meeting_student = request.user  # assign correct variables before saving
+                meeting_instance.meeting_adviser = request.user.profile.adviser
+                meeting_instance.save()
 
-            meeting_title = meeting_form.cleaned_data.get('meeting_title')
-            meeting_description = meeting_form.cleaned_data.get('meeting_description')
-            meeting_student_name = meeting_instance.meeting_student.profile.__str__()
-            meeting_date = meeting_form.cleaned_data.get('meeting_date')
-            meeting_time = meeting_form.cleaned_data.get('meeting_slot')
+                meeting_title = meeting_form.cleaned_data.get('meeting_title')
+                meeting_description = meeting_form.cleaned_data.get('meeting_description')
+                meeting_student_name = meeting_instance.meeting_student.profile.__str__()
+                meeting_date = meeting_form.cleaned_data.get('meeting_date')
+                meeting_time = meeting_form.cleaned_data.get('meeting_slot')
 
-            subject = 'Meeting requested from ' + meeting_student_name
-            message = 'Meeting date: {} at {} \n ' \
-                      'Meeting title: {} \n ' \
-                      'Meeting description: {} \n ' \
-                      'Please confirm or cancel the meeting.'.format(meeting_date, meeting_time, meeting_title,
-                                                                     meeting_description)
-            email_from = settings.EMAIL_HOST_USER  # meeting_instance.meeting_student.email
-            recipient_list = [meeting_instance.meeting_adviser.email, ]
-            # send_mail(subject, message, email_from, recipient_list)
+                subject = 'Meeting requested from ' + meeting_student_name
+                message = 'Meeting date: {} at {} \n ' \
+                          'Meeting title: {} \n ' \
+                          'Meeting description: {} \n ' \
+                          'Please confirm or cancel the meeting.'.format(meeting_date, meeting_time, meeting_title,
+                                                                         meeting_description)
+                email_from = settings.EMAIL_HOST_USER  # meeting_instance.meeting_student.email
+                recipient_list = [meeting_instance.meeting_adviser.email, ]
+                # send_mail(subject, message, email_from, recipient_list)
 
-            messages.success(request, 'Meeting created!')
-            return redirect('home')
+                messages.success(request, 'Meeting created!')
+                return redirect('home')
+        else:
+            meeting_form = MeetingForm(user=request.user)
     else:
-        meeting_form = MeetingForm(user=request.user)
+        return redirect('home')
 
     context = {'form': meeting_form}
     return render(request, 'authentication/meeting.html', context)
@@ -176,9 +189,9 @@ def meeting_detail_(request, pk):
 @login_required()
 def unconfirmed_meeting_list(request):
     if request.user.profile.user_type == "student":
-        queryset = Meeting.objects.filter(meeting_student=request.user)
+        queryset = Meeting.objects.filter(meeting_student=request.user)  # student meetings
     else:
-        queryset = Meeting.objects.filter(meeting_adviser=request.user)
+        queryset = Meeting.objects.filter(meeting_adviser=request.user)  # adviser meetings
     queryset = queryset.filter(confirmed=False).filter(meeting_date__gt=datetime.now()).order_by('meeting_date')
     context = {"meeting_list": queryset}
     return render(request, 'authentication/unconfirmed_meetings.html', context)
@@ -260,3 +273,30 @@ def unconfirm_specific_meeting(request, pk):
     queryset = queryset.filter(confirmed=True).filter(meeting_date__gt=datetime.now()).order_by('meeting_date')
     context = {"meeting_list": queryset}
     return render(request, 'authentication/confirmed_meetings.html', context)
+
+
+@login_required()
+def cancel_specific_meeting(request, pk):
+    delete_meeting = Meeting.objects.get(pk=pk)
+
+    subject = 'Meeting cancelled!'
+    message = 'Meeting date: {} at {} \n ' \
+              'Meeting title: {} \n ' \
+              'Meeting description: {} \n ' \
+              'This meeting has been cancelled. '.format(delete_meeting.meeting_date,
+                                                         delete_meeting.meeting_slot,
+                                                         delete_meeting.meeting_title,
+                                                         delete_meeting.meeting_description)
+    email_from = settings.EMAIL_HOST_USER  # delete_meeting.meeting_adviser.email
+    recipient_list = [delete_meeting.meeting_student.email, ]
+    # send_mail(subject, message, email_from, recipient_list)
+
+    delete_meeting.delete()
+
+    if request.user.profile.user_type == "student":
+        queryset = Meeting.objects.filter(meeting_student=request.user)
+    else:
+        queryset = Meeting.objects.filter(meeting_adviser=request.user)
+    queryset = queryset.filter(confirmed=False).filter(meeting_date__gt=datetime.now()).order_by('meeting_date')
+    context = {"meeting_list": queryset}
+    return render(request, 'authentication/unconfirmed_meetings.html', context)

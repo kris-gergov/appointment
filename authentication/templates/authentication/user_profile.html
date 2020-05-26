@@ -2,17 +2,35 @@
 
 {% block content %}
     <div class="container col-md-6 offset-md-3">
-        <div class="card">
+        <div class="card adviser">
             <div class="card-body">
-                <h1>Adviser profile</h1>
-                <p><strong>First name: </strong> {{ user.first_name }} </p>
-                <p><strong>Last name: </strong> {{ user.last_name }} </p>
-                <p><strong>Email: </strong> {{ user.email }} </p>
-                <p><strong>Current booking slots: </strong> {{ user.profile.booking_slots }} <a
-                        href="{% url 'change_slots' %}">
-                    <button type="button" class="btn btn-dark">Change</button>
-                </a></p>
-
+                <h1 class="adviser_title">Adviser profile</h1>
+                <div class="row mt-3">
+                    <div class="col-4"><p><strong>First name: </strong></p></div>
+                    <div class="col-8"><p>{{ user.first_name }}</p></div>
+                </div>
+                <div class="row">
+                    <div class="col-4"><p><strong>Last name: </strong></p></div> 
+                    <div class="col-8"><p>{{ user.last_name }}</p></div>
+                </div>
+                <div class="row">
+                    <div class="col-4"><p><strong>Email: </strong></p></div>
+                    <div class="col-8"><p>{{ user.email }}</p></div>
+                </div>
+                <p class="slots_title" style="margin-bottom: 0;"><strong>Current booking slots: </strong>
+                    {% if user.profile.booking_slots|length > 0 %}
+                        <div class="slots-wrapper mt-3 mb-3 col-md-10 col-md-offset-5">
+                            <div class="slots-inner">
+                                {% for slot in user.profile.booking_slots %}
+                                    <div class="adviser_slot">{{ slot }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                    <a href="{% url 'change_slots' %}" class="change_buttom">
+                        <button type="button" class="btn btn-dark">Change</button>
+                    </a>
+                </p>
             </div>
         </div>
     </div>

@@ -63,7 +63,9 @@
 }
 
 .month {
-    padding-bottom: 30px;
+    padding: 15px;
+    text-align: center;
+    font-size: 13px;
 }
 
 .footer {
@@ -73,4 +75,109 @@
     height: 60px;
     line-height: 60px;
     background-color: #f5f5f5;
+}
+table { 
+    width: 100%; 
+    box-sizing: border-box; 
+    box-shadow: inset 0px 0px 0px 1px rgb(0, 0, 0);
+    border-spacing: 0;
+    border-collapse: collapse;
+    border-radius: 1em;
+    overflow: hidden;
+}
+
+th, td {
+    border: 1px solid #000000;
+    box-sizing: border-box;
+}
+
+th {
+    text-transform: uppercase;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 10px 0 10px 1vw;
+    color: rgba(20, 20, 20, 0.5);
+    letter-spacing: 1px;
+}
+
+td {
+    transition: all 0.3s; 
+    font-size: 14px; color: rgb(20, 20, 20);
+    font-weight: 400; font-size: 14px;
+    vertical-align: initial; 
+    padding: 1.5% 0 1.5% 1vw;
+}
+
+td.day:hover { 
+    background-color: rgba(0,0,0,0.1); 
+    cursor: help;
+}
+
+td ul {
+    padding-left: 4vw;
+}
+.change_buttom {
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+}
+.slots-wrapper {
+    display: inline-block;
+}
+.slots-inner {
+    width: 90%;
+    margin: auto;
+}
+.slots_title {
+    margin-bottom: 0;
+    text-align: center;
+    padding: 0;
+    font-size: 1.6em;
+}
+.adviser p {
+    margin-bottom: 1vw;
+}
+div.adviser_slot {
+    padding: 2px 3px;
+    border: 1px solid #EBEBEB;
+    width: 23%;
+    display: inline-block;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+@media (max-width: 768px) {
+    .container, .container-sm {
+        max-width: 100%;
+    }
+}
+@media (max-width: 520px) {
+    .object-tools {
+        margin-top: -20px;
+    }
+    #content-main .p-3 {
+        padding-right: 0px !important;
+        padding-left: 0px !important;
+        padding-bottom: 0px !important;
+    }
+    .container {
+        padding-left: 0px !important;
+        padding-right: 0px !important;
+    }
+    .table th {
+        padding: 3vw 0;
+        text-align: center;
+    }
+    h1.adviser_title {
+        margin-top: -3vw;
+        margin-bottom: 3vw;
+    }
+    .slots_title {
+        padding: 2vw 0;
+    }
+}
+@media (max-width: 480px) {
+    .h1, h1 {
+        font-size: 2rem;
+    }
 }

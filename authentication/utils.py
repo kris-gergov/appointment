@@ -22,7 +22,7 @@ class EventCalendar(HTMLCalendar):
         if day == 0:
             return '<td class="noday">&nbsp;</td>'  # day outside month
         else:
-            return '<td class="%s">%d%s</td>' % (self.cssclasses[weekday], day, events_html)
+            return '<td class="%s day">%d%s</td>' % (self.cssclasses[weekday], day, events_html)
 
     def formatweek(self, theweek, events):
         """
@@ -37,9 +37,9 @@ class EventCalendar(HTMLCalendar):
         """
 
         if current_user.profile.user_type == "student":
-            events = Meeting.objects.filter(meeting_date__month=themonth).filter(meeting_student=current_user)
+            events = Meeting.objects.filter(meeting_date__month=themonth).filter(meeting_student=current_user).filter(confirmed=True)
         else:
-            events = Meeting.objects.filter(meeting_date__month=themonth).filter(meeting_adviser=current_user)
+            events = Meeting.objects.filter(meeting_date__month=themonth).filter(meeting_adviser=current_user).filter(confirmed=True)
 
         v = []
         a = v.append

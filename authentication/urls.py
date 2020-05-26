@@ -16,4 +16,5 @@ urlpatterns = [
     path('past_meetings/', views.past_meeting_list, name="past_meetings"),
     path('confirm_specific_meeting/<int:pk>/', views.confirm_specific_meeting, name="confirm_specific_meeting"),
     path('unconfirm_specific_meeting/<int:pk>/', views.unconfirm_specific_meeting, name="unconfirm_specific_meeting"),
+    path('cancel_specific_meeting/<int:pk>/', views.cancel_specific_meeting, name="cancel_specific_meeting"),
 ]

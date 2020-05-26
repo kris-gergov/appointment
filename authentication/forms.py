@@ -90,12 +90,12 @@ class MeetingForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user')
         super(MeetingForm, self).__init__(*args, **kwargs)
-        adviser_slots = user.profile.adviser.profile.booking_slots
-        self.fields['meeting_slot'].choices = [(val, val) for val in adviser_slots]
+        adviser_slots = user.profile.adviser.profile.booking_slots  # get current adviser booking slots
+        self.fields['meeting_slot'].choices = [(val, val) for val in adviser_slots]  # add them to the dropdown
 
     def clean_meeting_date(self):
         meeting_date = self.cleaned_data.get('meeting_date')
-        if meeting_date < datetime.date.today():
+        if meeting_date < datetime.date.today():  # check if date is in the past
             raise forms.ValidationError("The date cannot be in the past!")
         return meeting_date
 

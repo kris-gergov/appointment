@@ -20,7 +20,7 @@ class Profile(models.Model):
         blank=True,
         null=True,
         validators=[
-            MinValueValidator(1),
+            MinValueValidator(1),  # minimum year is 1 and maximum is 4
             MaxValueValidator(4)
         ]
     )
@@ -42,6 +42,7 @@ class Profile(models.Model):
         ('16:00', "16:00"),
         ('16:30', "16:30"),
     )
+    # MultiSelectField allows adviser to pick multiple slots
     booking_slots = MultiSelectField(choices=SLOT_CHOICES, default='09:00', blank=True, null=True)
     adviser = models.ForeignKey(User, related_name='+', null=True, blank=True, on_delete=models.CASCADE)
 
@@ -68,6 +69,10 @@ class Meeting(models.Model):
     def get_absolute_url(self):
         url = reverse('meeting_detail', kwargs={'pk': self.id})
         return u'<a href="%s">%s</a>' % (url, str(self.meeting_slot))
+
+    def get_absolute_url_title(self):
+        url = reverse('meeting_detail', kwargs={'pk': self.id})
+        return url
 
     def clean(self):
         meetings = Meeting.objects.filter(meeting_date=self.meeting_date)
